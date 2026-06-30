@@ -1,7 +1,5 @@
+import { RequestInbox } from "@/components/request-inbox";
+
 export default function Home() {
-  return (
-    <main>
-      <div>Hello world!</div>
-    </main>
-  );
+  return <RequestInbox />;
 }
