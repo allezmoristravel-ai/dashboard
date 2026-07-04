@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -11,11 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/status-badge";
-import { DevPaymentToggle } from "@/components/dev-payment-toggle";
+import { FormTypeBadge } from "@/components/form-type-badge";
 import { DeclineDialog } from "@/components/decline-dialog";
-import { AmountsDialog } from "@/components/amounts-dialog";
+import { SendPaymentDialog } from "@/components/send-payment-dialog";
 import { useRequests } from "@/lib/store";
-import type { BookingRequest, RequestStatus } from "@/lib/types";
+import type { BookingRequest, DbPayment, RequestStatus } from "@/lib/types";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {
@@ -42,10 +42,7 @@ function formatMUR(amount: number | null) {
 
 const TIMELINE_STEPS: { status: RequestStatus; label: string }[] = [
   { status: "pending_review", label: "Request created" },
-  { status: "approved", label: "Approved by owner" },
-  { status: "awaiting_deposit", label: "Deposit link sent" },
-  { status: "deposit_paid", label: "Deposit received" },
-  { status: "awaiting_balance", label: "Balance link sent" },
+  { status: "awaiting_payment", label: "Approved — payment link sent" },
   { status: "confirmed", label: "Fully paid & confirmed" },
   { status: "completed", label: "Activity completed" },
 ];
@@ -53,33 +50,31 @@ const TIMELINE_STEPS: { status: RequestStatus; label: string }[] = [
 const STATUS_RANK: Record<RequestStatus, number> = {
   pending_review: 0,
   declined: 0,
-  approved: 1,
-  awaiting_deposit: 2,
-  deposit_paid: 3,
-  awaiting_balance: 4,
-  confirmed: 5,
-  reminded: 5,
-  completed: 6,
+  approved: 0,
+  awaiting_payment: 1,
+  confirmed: 2,
+  reminded: 2,
+  completed: 3,
   cancelled: 0,
 };
 
 export function RequestDetail({ request }: { request: BookingRequest }) {
-  const {
-    approveRequest,
-    sendDepositLink,
-    sendBalanceLink,
-    resendLink,
-    cancelRequest,
-    markCompleted,
-  } = useRequests();
+  const { cancelRequest, markCompleted, fetchPaymentForRequest } =
+    useRequests();
 
   const [declineOpen, setDeclineOpen] = useState(false);
-  const [amountsOpen, setAmountsOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [payment, setPayment] = useState<DbPayment | null>(null);
 
-  const hasAmounts =
-    request.depositAmount !== null &&
-    request.balanceAmount !== null &&
-    request.totalAmount !== null;
+  useEffect(() => {
+    let cancelled = false;
+    fetchPaymentForRequest(request.id).then((p) => {
+      if (!cancelled) setPayment(p);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [request.id, fetchPaymentForRequest]);
 
   const currentRank = STATUS_RANK[request.status];
 
@@ -103,6 +98,7 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                 <CardTitle className="text-lg">Request Information</CardTitle>
                 <StatusBadge status={request.status} />
               </div>
+              <FormTypeBadge formType={request.formType} />
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
@@ -115,15 +111,22 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                   <p className="font-medium">{request.activityName}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Requested Date</p>
-                  <p className="font-medium">{formatDate(request.requestedDate)}</p>
+                  <p className="text-sm text-muted-foreground">Start Date</p>
+                  <p className="font-medium">{formatDate(request.startDate)}</p>
+                </div>
+                {request.endDate && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">End Date</p>
+                    <p className="font-medium">{formatDate(request.endDate)}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-muted-foreground">Adults</p>
+                  <p className="font-medium">{request.adults}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Party Size</p>
-                  <p className="font-medium">
-                    {request.partySize}{" "}
-                    {request.partySize === 1 ? "person" : "people"}
-                  </p>
+                  <p className="text-sm text-muted-foreground">Children</p>
+                  <p className="font-medium">{request.children}</p>
                 </div>
               </div>
 
@@ -132,15 +135,15 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <p className="text-sm text-muted-foreground">Customer</p>
-                  <p className="font-medium">{request.customerName}</p>
+                  <p className="font-medium">{request.fullName}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium">{request.customerEmail}</p>
+                  <p className="font-medium">{request.email}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="font-medium">{request.customerPhone}</p>
+                  <p className="font-medium">{request.phone}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Created</p>
@@ -148,13 +151,15 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                 </div>
               </div>
 
-              {request.notes && (
+              {request.message && (
                 <>
                   <Separator />
                   <div>
-                    <p className="text-sm text-muted-foreground">Notes</p>
+                    <p className="text-sm text-muted-foreground">
+                      {request.formType === "transfer" ? "Flight Details" : "Notes"}
+                    </p>
                     <p className="mt-1 whitespace-pre-wrap text-sm">
-                      {request.notes}
+                      {request.message}
                     </p>
                   </div>
                 </>
@@ -162,13 +167,13 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
             </CardContent>
           </Card>
 
-          {hasAmounts && (
+          {request.totalAmount !== null && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Payment Information</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 sm:grid-cols-3">
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Total</p>
                     <p className="text-xl font-bold">
@@ -176,25 +181,11 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Deposit</p>
-                    <p className="text-xl font-bold">
-                      {formatMUR(request.depositAmount)}
-                    </p>
-                    {request.depositPaid ? (
-                      <span className="text-sm text-emerald-600">Paid</span>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">
-                        Pending
+                    <p className="text-sm text-muted-foreground">Status</p>
+                    {request.paid ? (
+                      <span className="text-sm font-medium text-emerald-600">
+                        Paid
                       </span>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Balance</p>
-                    <p className="text-xl font-bold">
-                      {formatMUR(request.balanceAmount)}
-                    </p>
-                    {request.balancePaid ? (
-                      <span className="text-sm text-emerald-600">Paid</span>
                     ) : (
                       <span className="text-sm text-muted-foreground">
                         Pending
@@ -202,6 +193,23 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                     )}
                   </div>
                 </div>
+
+                {payment && (
+                  <>
+                    <Separator />
+                    <div className="grid gap-2 text-xs text-muted-foreground">
+                      {payment.quickbooks_invoice_id && (
+                        <p>QB Invoice #{payment.quickbooks_invoice_id}</p>
+                      )}
+                      {payment.quickbooks_payment_id && (
+                        <p>QB Payment #{payment.quickbooks_payment_id}</p>
+                      )}
+                      {payment.pay_url && !payment.quickbooks_invoice_id && (
+                        <p>Provider: {payment.provider}</p>
+                      )}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
@@ -218,7 +226,7 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                 <>
                   <Button
                     className="w-full"
-                    onClick={() => approveRequest(request.id)}
+                    onClick={() => setPaymentOpen(true)}
                   >
                     Approve
                   </Button>
@@ -230,63 +238,6 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                     Decline
                   </Button>
                 </>
-              )}
-
-              {request.status === "approved" && !hasAmounts && (
-                <Button
-                  className="w-full"
-                  onClick={() => setAmountsOpen(true)}
-                >
-                  Set Amounts
-                </Button>
-              )}
-
-              {request.status === "approved" && hasAmounts && (
-                <>
-                  <Button
-                    className="w-full"
-                    onClick={() => sendDepositLink(request.id)}
-                  >
-                    Send Deposit Link
-                  </Button>
-                  <Button
-                    className="w-full"
-                    variant="outline"
-                    onClick={() => setAmountsOpen(true)}
-                  >
-                    Edit Amounts
-                  </Button>
-                </>
-              )}
-
-              {request.status === "awaiting_deposit" && (
-                <Button
-                  className="w-full"
-                  variant="outline"
-                  onClick={() => resendLink(request.id)}
-                >
-                  Resend Deposit Link
-                </Button>
-              )}
-
-              {request.status === "deposit_paid" && (
-                <Button
-                  className="w-full"
-                  onClick={() => sendBalanceLink(request.id)}
-                >
-                  Send Balance Link
-                </Button>
-              )}
-
-              {(request.status === "awaiting_balance" ||
-                request.status === "awaiting_deposit") && (
-                <Button
-                  className="w-full"
-                  variant="outline"
-                  onClick={() => resendLink(request.id)}
-                >
-                  Resend Link
-                </Button>
               )}
 
               {request.status === "confirmed" && (
@@ -349,7 +300,7 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
               {request.status !== "declined" &&
                 request.status !== "cancelled" && (
                   <div className="space-y-4">
-                    {TIMELINE_STEPS.map((step, i) => {
+                    {TIMELINE_STEPS.map((step) => {
                       const stepRank = STATUS_RANK[step.status];
                       const done = stepRank <= currentRank;
                       return (
@@ -379,8 +330,6 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                 )}
             </CardContent>
           </Card>
-
-          <DevPaymentToggle request={request} />
         </div>
       </div>
 
@@ -389,10 +338,10 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
         open={declineOpen}
         onOpenChange={setDeclineOpen}
       />
-      <AmountsDialog
+      <SendPaymentDialog
         request={request}
-        open={amountsOpen}
-        onOpenChange={setAmountsOpen}
+        open={paymentOpen}
+        onOpenChange={setPaymentOpen}
       />
     </>
   );

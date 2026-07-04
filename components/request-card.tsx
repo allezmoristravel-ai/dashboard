@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
-import { useRequests } from "@/lib/store";
+import { FormTypeBadge } from "@/components/form-type-badge";
 import type { BookingRequest } from "@/lib/types";
 import { useState } from "react";
 import { DeclineDialog } from "@/components/decline-dialog";
-import { AmountsDialog } from "@/components/amounts-dialog";
+import { SendPaymentDialog } from "@/components/send-payment-dialog";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {
@@ -28,15 +28,17 @@ function formatMUR(amount: number | null) {
   return `MUR ${amount.toLocaleString()}`;
 }
 
-export function RequestCard({ request }: { request: BookingRequest }) {
-  const { approveRequest, sendDepositLink, resendLink } = useRequests();
-  const [declineOpen, setDeclineOpen] = useState(false);
-  const [amountsOpen, setAmountsOpen] = useState(false);
+function formatPartySize(adults: number, children: number) {
+  const parts = [`${adults} ${adults === 1 ? "adult" : "adults"}`];
+  if (children > 0) {
+    parts.push(`${children} ${children === 1 ? "child" : "children"}`);
+  }
+  return parts.join(", ");
+}
 
-  const hasAmounts =
-    request.depositAmount !== null &&
-    request.balanceAmount !== null &&
-    request.totalAmount !== null;
+export function RequestCard({ request }: { request: BookingRequest }) {
+  const [declineOpen, setDeclineOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   return (
     <>
@@ -52,33 +54,23 @@ export function RequestCard({ request }: { request: BookingRequest }) {
             <h3 className="text-base font-semibold leading-tight">
               {request.activityName}
             </h3>
+            <FormTypeBadge formType={request.formType} />
           </CardHeader>
           <CardContent className="space-y-1 pb-2 text-sm">
-            <p className="text-muted-foreground">{request.customerName}</p>
+            <p className="text-muted-foreground">{request.fullName}</p>
             <div className="flex items-center gap-3 text-muted-foreground">
-              <span>{formatDate(request.requestedDate)}</span>
+              <span>{formatDate(request.startDate)}</span>
               <span>&middot;</span>
-              <span>
-                {request.partySize} {request.partySize === 1 ? "person" : "people"}
-              </span>
+              <span>{formatPartySize(request.adults, request.children)}</span>
             </div>
-            {hasAmounts && (
+            {request.totalAmount !== null && (
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
                 <span>
                   Total: <strong>{formatMUR(request.totalAmount)}</strong>
                 </span>
-                <span>
-                  Deposit: {formatMUR(request.depositAmount)}
-                  {request.depositPaid && (
-                    <span className="ml-1 text-emerald-600">Paid</span>
-                  )}
-                </span>
-                <span>
-                  Balance: {formatMUR(request.balanceAmount)}
-                  {request.balancePaid && (
-                    <span className="ml-1 text-emerald-600">Paid</span>
-                  )}
-                </span>
+                {request.paid && (
+                  <span className="text-emerald-600">Paid</span>
+                )}
               </div>
             )}
           </CardContent>
@@ -91,7 +83,7 @@ export function RequestCard({ request }: { request: BookingRequest }) {
                 size="sm"
                 onClick={(e) => {
                   e.preventDefault();
-                  approveRequest(request.id);
+                  setPaymentOpen(true);
                 }}
               >
                 Approve
@@ -108,55 +100,6 @@ export function RequestCard({ request }: { request: BookingRequest }) {
               </Button>
             </>
           )}
-
-          {request.status === "approved" && !hasAmounts && (
-            <Button
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                setAmountsOpen(true);
-              }}
-            >
-              Set Amounts
-            </Button>
-          )}
-
-          {request.status === "approved" && hasAmounts && (
-            <>
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  sendDepositLink(request.id);
-                }}
-              >
-                Send Deposit Link
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setAmountsOpen(true);
-                }}
-              >
-                Edit Amounts
-              </Button>
-            </>
-          )}
-
-          {request.status === "awaiting_deposit" && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                resendLink(request.id);
-              }}
-            >
-              Resend Link
-            </Button>
-          )}
         </CardFooter>
       </Card>
 
@@ -165,10 +108,10 @@ export function RequestCard({ request }: { request: BookingRequest }) {
         open={declineOpen}
         onOpenChange={setDeclineOpen}
       />
-      <AmountsDialog
+      <SendPaymentDialog
         request={request}
-        open={amountsOpen}
-        onOpenChange={setAmountsOpen}
+        open={paymentOpen}
+        onOpenChange={setPaymentOpen}
       />
     </>
   );

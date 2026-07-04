@@ -25,11 +25,12 @@ export function DeclineDialog({
   open,
   onOpenChange,
 }: DeclineDialogProps) {
-  const { declineRequest } = useRequests();
+  const { declineRequest, isActionPending } = useRequests();
   const [note, setNote] = useState("");
+  const pending = isActionPending(requestId);
 
-  function handleConfirm() {
-    declineRequest(requestId, note || undefined);
+  async function handleConfirm() {
+    await declineRequest(requestId, note || undefined);
     setNote("");
     onOpenChange(false);
   }
@@ -53,11 +54,15 @@ export function DeclineDialog({
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={pending}
+          >
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleConfirm}>
-            Decline
+          <Button variant="destructive" onClick={handleConfirm} disabled={pending}>
+            {pending ? "Declining…" : "Decline"}
           </Button>
         </DialogFooter>
       </DialogContent>
