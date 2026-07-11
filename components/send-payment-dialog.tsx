@@ -61,7 +61,7 @@ export function SendPaymentDialog({
         </DialogHeader>
         <div className="grid gap-4">
           <div className="space-y-2">
-            <Label htmlFor="total">Total Amount (MUR)</Label>
+            <Label htmlFor="total">Total Amount (EUR)</Label>
             <Input
               id="total"
               type="number"
