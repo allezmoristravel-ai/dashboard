@@ -35,9 +35,9 @@ function formatDateTime(iso: string) {
   });
 }
 
-function formatMUR(amount: number | null) {
+function formatEUR(amount: number | null) {
   if (amount === null) return "—";
-  return `MUR ${amount.toLocaleString()}`;
+  return `EUR ${amount.toLocaleString()}`;
 }
 
 const TIMELINE_STEPS: { status: RequestStatus; label: string }[] = [
@@ -177,7 +177,7 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                   <div>
                     <p className="text-sm text-muted-foreground">Total</p>
                     <p className="text-xl font-bold">
-                      {formatMUR(request.totalAmount)}
+                      {formatEUR(request.totalAmount)}
                     </p>
                   </div>
                   <div>

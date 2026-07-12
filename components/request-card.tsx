@@ -23,9 +23,9 @@ function formatDate(iso: string) {
   });
 }
 
-function formatMUR(amount: number | null) {
+function formatEUR(amount: number | null) {
   if (amount === null) return "—";
-  return `MUR ${amount.toLocaleString()}`;
+  return `EUR ${amount.toLocaleString()}`;
 }
 
 function formatPartySize(adults: number, children: number) {
@@ -66,7 +66,7 @@ export function RequestCard({ request }: { request: BookingRequest }) {
             {request.totalAmount !== null && (
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
                 <span>
-                  Total: <strong>{formatMUR(request.totalAmount)}</strong>
+                  Total: <strong>{formatEUR(request.totalAmount)}</strong>
                 </span>
                 {request.paid && (
                   <span className="text-emerald-600">Paid</span>
