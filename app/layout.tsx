@@ -23,7 +23,7 @@ export default function RootLayout({
       <body>
         <RequestProvider>
           <Header />
-          <main className="container mx-auto px-4 py-6">{children}</main>
+          <main className="container mx-auto px-4 py-8 sm:px-6">{children}</main>
           <Toaster richColors />
         </RequestProvider>
       </body>

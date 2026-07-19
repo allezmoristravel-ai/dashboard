@@ -6,6 +6,7 @@ function makeRequest(overrides: Partial<BookingRequest> = {}): BookingRequest {
   return {
     id: "test-001",
     reference: "REQ-TEST-001",
+    activityRef: "test-activity",
     activityName: "Test Activity",
     fullName: "Test Customer",
     email: "test@test.com",

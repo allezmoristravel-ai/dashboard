@@ -42,34 +42,38 @@ export function RequestCard({ request }: { request: BookingRequest }) {
 
   return (
     <>
-      <Card className="flex flex-col transition-shadow hover:shadow-md">
+      <Card className="flex flex-col transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-foreground/15">
         <Link href={`/requests/${request.id}`} className="flex-1">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-semibold text-muted-foreground">
+              <span className="font-mono text-xs font-medium text-muted-foreground">
                 {request.reference}
               </span>
               <StatusBadge status={request.status} />
             </div>
-            <h3 className="text-base font-semibold leading-tight">
+            <h3 className="text-base font-semibold leading-tight text-foreground">
               {request.activityName}
             </h3>
             <FormTypeBadge formType={request.formType} />
           </CardHeader>
-          <CardContent className="space-y-1 pb-2 text-sm">
-            <p className="text-muted-foreground">{request.fullName}</p>
-            <div className="flex items-center gap-3 text-muted-foreground">
+          <CardContent className="space-y-1.5 pb-2 text-sm">
+            <p className="font-medium text-foreground">{request.fullName}</p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>{formatDate(request.startDate)}</span>
-              <span>&middot;</span>
+              <span aria-hidden className="text-border">
+                &middot;
+              </span>
               <span>{formatPartySize(request.adults, request.children)}</span>
             </div>
             {request.totalAmount !== null && (
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                <span>
-                  Total: <strong>{formatEUR(request.totalAmount)}</strong>
+              <div className="mt-2.5 flex items-center gap-2 border-t border-border/70 pt-2.5">
+                <span className="text-sm font-semibold tabular-nums text-foreground">
+                  {formatEUR(request.totalAmount)}
                 </span>
                 {request.paid && (
-                  <span className="text-emerald-600">Paid</span>
+                  <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700">
+                    Paid
+                  </span>
                 )}
               </div>
             )}

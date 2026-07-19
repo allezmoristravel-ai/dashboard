@@ -25,6 +25,7 @@ export const FORM_TYPE_LABELS: Record<FormType, string> = {
 export interface BookingRequest {
   id: string;
   reference: string;
+  activityRef: string | null;
   activityName: string;
   fullName: string;
   email: string;
@@ -116,6 +117,7 @@ export function mapDbRow(row: DbBookingRequest): BookingRequest {
   return {
     id: row.id,
     reference: row.reference ?? "",
+    activityRef: row.activity_ref,
     activityName: row.activity_name ?? "",
     fullName: row.full_name,
     email: row.email,

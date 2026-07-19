@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown, Inbox } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,8 +23,8 @@ export function RequestInbox() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="flex items-center justify-center py-24">
+        <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
@@ -42,21 +43,33 @@ export function RequestInbox() {
   const archiveCount = archiveGroups.reduce((n, g) => n + g.items.length, 0);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {activeGroups.length === 0 && (
-        <p className="py-12 text-center text-muted-foreground">
-          No active requests.
-        </p>
+        <div className="flex flex-col items-center gap-3 py-24 text-center">
+          <span className="flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <Inbox className="size-5" strokeWidth={1.75} />
+          </span>
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              No active requests
+            </p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              New booking requests will appear here as they come in.
+            </p>
+          </div>
+        </div>
       )}
 
       {activeGroups.map((group) => (
         <section key={group.status}>
-          <h2 className="mb-3 text-lg font-semibold">
-            {STATUS_GROUP_LABELS[group.status] ?? STATUS_LABELS[group.status]}
-            <span className="ml-2 text-sm font-normal text-muted-foreground">
-              ({group.items.length})
+          <div className="mb-4 flex items-baseline gap-2">
+            <h2 className="text-[15px] font-semibold tracking-tight text-foreground">
+              {STATUS_GROUP_LABELS[group.status] ?? STATUS_LABELS[group.status]}
+            </h2>
+            <span className="text-sm tabular-nums text-muted-foreground">
+              {group.items.length}
             </span>
-          </h2>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {group.items.map((req) => (
               <RequestCard key={req.id} request={req} />
@@ -67,18 +80,22 @@ export function RequestInbox() {
 
       {archiveCount > 0 && (
         <Collapsible open={archiveOpen} onOpenChange={setArchiveOpen}>
-          <CollapsibleTrigger className="inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
-            {archiveOpen ? "Hide" : "Show"} archive / other ({archiveCount})
+          <CollapsibleTrigger className="group inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+            <ChevronDown className="size-4 transition-transform group-aria-expanded:rotate-180" />
+            {archiveOpen ? "Hide" : "Show"} archive &amp; other
+            <span className="tabular-nums">({archiveCount})</span>
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-4 space-y-8">
+          <CollapsibleContent className="mt-5 space-y-10">
             {archiveGroups.map((group) => (
               <section key={group.status}>
-                <h2 className="mb-3 text-lg font-semibold">
-                  {STATUS_LABELS[group.status]}
-                  <span className="ml-2 text-sm font-normal text-muted-foreground">
-                    ({group.items.length})
+                <div className="mb-4 flex items-baseline gap-2">
+                  <h2 className="text-[15px] font-semibold tracking-tight text-foreground">
+                    {STATUS_LABELS[group.status]}
+                  </h2>
+                  <span className="text-sm tabular-nums text-muted-foreground">
+                    {group.items.length}
                   </span>
-                </h2>
+                </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {group.items.map((req) => (
                     <RequestCard key={req.id} request={req} />

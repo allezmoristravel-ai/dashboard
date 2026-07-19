@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowLeft, Check } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -80,13 +81,24 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
 
   return (
     <>
-      <div className="mb-4">
-        <Link
-          href="/"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          &larr; Back to inbox
-        </Link>
+      <Link
+        href="/"
+        className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        Back to inbox
+      </Link>
+
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="font-mono text-sm text-muted-foreground">
+            {request.reference}
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            {request.activityName}
+          </h1>
+        </div>
+        <StatusBadge status={request.status} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -96,9 +108,8 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Request Information</CardTitle>
-                <StatusBadge status={request.status} />
+                <FormTypeBadge formType={request.formType} />
               </div>
-              <FormTypeBadge formType={request.formType} />
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
@@ -176,14 +187,15 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Total</p>
-                    <p className="text-xl font-bold">
+                    <p className="text-2xl font-semibold tabular-nums text-primary">
                       {formatEUR(request.totalAmount)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Status</p>
                     {request.paid ? (
-                      <span className="text-sm font-medium text-emerald-600">
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
+                        <Check className="size-3.5" strokeWidth={2.5} />
                         Paid
                       </span>
                     ) : (
@@ -221,7 +233,7 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
             <CardHeader>
               <CardTitle className="text-lg">Actions</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2.5">
               {request.status === "pending_review" && (
                 <>
                   <Button
@@ -283,46 +295,55 @@ export function RequestDetail({ request }: { request: BookingRequest }) {
             <CardContent>
               {request.status === "declined" && (
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 h-3 w-3 rounded-full bg-red-500" />
-                  <div>
-                    <p className="text-sm font-medium">Request declined</p>
-                  </div>
+                  <div className="mt-1 size-2.5 shrink-0 rounded-full bg-red-500" />
+                  <p className="text-sm font-medium text-foreground">
+                    Request declined
+                  </p>
                 </div>
               )}
               {request.status === "cancelled" && (
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 h-3 w-3 rounded-full bg-red-500" />
-                  <div>
-                    <p className="text-sm font-medium">Request cancelled</p>
-                  </div>
+                  <div className="mt-1 size-2.5 shrink-0 rounded-full bg-red-500" />
+                  <p className="text-sm font-medium text-foreground">
+                    Request cancelled
+                  </p>
                 </div>
               )}
               {request.status !== "declined" &&
                 request.status !== "cancelled" && (
-                  <div className="space-y-4">
-                    {TIMELINE_STEPS.map((step) => {
+                  <div>
+                    {TIMELINE_STEPS.map((step, i) => {
                       const stepRank = STATUS_RANK[step.status];
                       const done = stepRank <= currentRank;
+                      const isLast = i === TIMELINE_STEPS.length - 1;
                       return (
-                        <div key={step.status} className="flex items-start gap-3">
-                          <div
-                            className={`mt-0.5 h-3 w-3 rounded-full ${
-                              done
-                                ? "bg-emerald-500"
-                                : "border-2 border-muted-foreground/30 bg-transparent"
-                            }`}
-                          />
-                          <div>
-                            <p
-                              className={`text-sm ${
+                        <div key={step.status} className="flex gap-3">
+                          <div className="flex flex-col items-center">
+                            <div
+                              className={`size-2.5 shrink-0 rounded-full ${
                                 done
-                                  ? "font-medium"
-                                  : "text-muted-foreground"
+                                  ? "bg-primary"
+                                  : "border-2 border-muted-foreground/30 bg-transparent"
                               }`}
-                            >
-                              {step.label}
-                            </p>
+                            />
+                            {!isLast && (
+                              <div
+                                className={`w-px flex-1 ${
+                                  done ? "bg-primary/40" : "bg-border"
+                                }`}
+                                style={{ minHeight: "1.25rem" }}
+                              />
+                            )}
                           </div>
+                          <p
+                            className={`pb-4 text-sm ${
+                              done
+                                ? "font-medium text-foreground"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {step.label}
+                          </p>
                         </div>
                       );
                     })}

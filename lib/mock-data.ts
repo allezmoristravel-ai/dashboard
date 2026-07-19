@@ -4,6 +4,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-001",
     reference: "REQ-2026-0042",
+    activityRef: "catamaran-sunset-cruise",
     activityName: "Catamaran Sunset Cruise",
     fullName: "Jean-Pierre Dupont",
     email: "jp.dupont@email.com",
@@ -23,6 +24,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-002",
     reference: "REQ-2026-0043",
+    activityRef: "le-morne-hiking-trail",
     activityName: "Le Morne Hiking Trail",
     fullName: "Sarah Chen",
     email: "sarah.c@gmail.com",
@@ -42,6 +44,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-003",
     reference: "REQ-2026-0044",
+    activityRef: "seaside-villa-trou-aux-biches",
     activityName: "Seaside Villa — Trou aux Biches",
     fullName: "Raj Patel",
     email: "raj.p@outlook.com",
@@ -61,6 +64,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-004",
     reference: "REQ-2026-0038",
+    activityRef: "toyota-rav4",
     activityName: "Toyota RAV4",
     fullName: "Marie Leblanc",
     email: "marie.lb@free.fr",
@@ -80,6 +84,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-005",
     reference: "REQ-2026-0035",
+    activityRef: "deep-sea-fishing-half-day",
     activityName: "Deep Sea Fishing Half Day",
     fullName: "Tom Williams",
     email: "tom.w@yahoo.co.uk",
@@ -99,6 +104,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-006",
     reference: "REQ-2026-0036",
+    activityRef: "ssr-airport-le-morne",
     activityName: "SSR Airport — Le Morne",
     fullName: "Aisha Mohammed",
     email: "aisha.m@gmail.com",
@@ -118,6 +124,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-007",
     reference: "REQ-2026-0030",
+    activityRef: "quad-biking-adventure",
     activityName: "Quad Biking Adventure",
     fullName: "Lucas Martin",
     email: "lucas.martin@web.de",
@@ -137,6 +144,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-008",
     reference: "REQ-2026-0025",
+    activityRef: "underwater-sea-walk",
     activityName: "Underwater Sea Walk",
     fullName: "Yuki Tanaka",
     email: "yuki.t@icloud.com",
@@ -156,6 +164,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-009",
     reference: "REQ-2026-0018",
+    activityRef: "garden-view-bungalow",
     activityName: "Garden View Bungalow",
     fullName: "Elena Rossi",
     email: "elena.r@tin.it",
@@ -175,6 +184,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-010",
     reference: "REQ-2026-0040",
+    activityRef: "suzuki-swift",
     activityName: "Suzuki Swift",
     fullName: "Mike Johnson",
     email: "mike.j@aol.com",
@@ -194,6 +204,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-011",
     reference: "REQ-2026-0022",
+    activityRef: "glass-bottom-boat-blue-bay",
     activityName: "Glass Bottom Boat — Blue Bay",
     fullName: "Priya Sharma",
     email: "priya.s@rediffmail.com",
@@ -213,6 +224,7 @@ export const MOCK_REQUESTS: BookingRequest[] = [
   {
     id: "req-012",
     reference: "REQ-2026-0028",
+    activityRef: "zip-line-domaine-de-letoile",
     activityName: "Zip Line at Domaine de l'Etoile",
     fullName: "Anna Kowalski",
     email: "anna.k@wp.pl",
