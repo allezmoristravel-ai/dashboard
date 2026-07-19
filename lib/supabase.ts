@@ -15,6 +15,13 @@ export function getSupabase() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     client = (createClient as any)(url, key, {
       db: { schema: "booking" },
+      // Explicit so the session survives app restarts when installed as a
+      // standalone PWA (its own storage context, separate from Safari/Chrome).
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
     });
   }
   return client;

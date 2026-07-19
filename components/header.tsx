@@ -14,7 +14,7 @@ export function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-card/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-20 border-b bg-card/80 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
       <div className="container mx-auto flex items-center justify-between px-4 py-3.5 sm:px-6">
         <div className="flex items-center gap-2.5">
           <Image
