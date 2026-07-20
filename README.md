@@ -65,6 +65,57 @@ unchanged (the same tokens `StatusBadge` uses in the inbox) — see
 `lib/calendar-styles.ts` for the border-style/opacity/icon/default-visibility
 metadata layered on top.
 
+## Table view
+
+`/table` (`app/table/page.tsx`, `components/table/*`) is a dense, sortable,
+filterable table over `booking.requests`, for browsing many bookings at once
+instead of the inbox's cards or the calendar's grid.
+
+**Default columns**: ⚠ conflict indicator, Status, Guest, Activity, Date,
+Party, Amount. **Hidden by default, available via the "Columns" picker**:
+Email, Phone, Submitted, Reference, Message, QuickBooks refs. Column
+visibility is defined in `lib/table-query.ts`
+(`TABLE_COLUMN_IDS`/`DEFAULT_TABLE_COLUMNS`/`COLUMN_LABELS`) — add a column
+there, wire its cell in `components/table/request-table.tsx`, and (if it
+should sort) add it to `SORTABLE_FIELDS`.
+
+**Why these defaults**: chosen from the live schema, not the doc this feature
+was speced from — `reference` and `activity_ref` are 100% null in current
+data (so `activity_ref`-based conflict detection can't fire on real bookings
+yet, and `reference` is hidden rather than defaulted-on), `notes` is a
+db column the app has never read, and `payments`/`messages` are currently
+empty tables. "Payment state" is derived from `requests.total_amount`/`paid`
+directly rather than joining `payments`, so it isn't permanently blank.
+
+**State in the URL**: filters, sort, and visible columns all serialise into
+the query string (`lib/table-query.ts`: `parseTableSearchParams` /
+`tableStateToSearchParams`), so a filtered/sorted view is a shareable link
+that survives refresh. Visible columns also persist to `localStorage`
+(`table-visible-columns`) as the fallback when the URL doesn't specify
+`cols` — an explicit `?cols=` in a shared link always wins over what's
+stored locally on the device that opens it.
+
+**Data path**: paginated (`.range()`, page size 50) and filtered server-side
+via `lib/use-table-requests.ts`, which opens its own Supabase query/Realtime
+channel — deliberately separate from `useRequests()` in `lib/store.tsx`,
+which loads the *entire* unpaginated list for the inbox/calendar and isn't
+shaped for range/order/filter queries. Row actions (approve, decline, cancel,
+mark completed) still go through the shared `useRequests()` handlers in
+`lib/store.tsx` unchanged — same n8n-webhook-vs-direct-SDK-write split as the
+inbox, nothing new.
+
+**Conflict detection** reuses `detectConflicts()` from `lib/conflicts.ts`
+unchanged, computed over the full (unpaginated) request list already held in
+the app-wide store — not the table's current page — so a conflict spanning
+two pages is still found. The "conflicts only" filter passes that ID set to
+the server query as an `.in("id", …)` filter.
+
+**Mobile** (below `sm`): the table collapses to the same `RequestCard` list
+component the inbox uses, rather than a horizontally-scrolling table — the
+owner runs this installed on his phone, and reusing the card view means no
+new layout to design for a cramped screen, at the cost of the extra columns
+(email, phone, etc.) only being one tap away on the detail page.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

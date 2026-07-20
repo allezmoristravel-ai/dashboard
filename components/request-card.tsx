@@ -11,30 +11,10 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { FormTypeBadge } from "@/components/form-type-badge";
 import type { BookingRequest } from "@/lib/types";
+import { formatDate, formatEUR, formatPartySize } from "@/lib/format";
 import { useState } from "react";
 import { DeclineDialog } from "@/components/decline-dialog";
 import { SendPaymentDialog } from "@/components/send-payment-dialog";
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatEUR(amount: number | null) {
-  if (amount === null) return "—";
-  return `EUR ${amount.toLocaleString()}`;
-}
-
-function formatPartySize(adults: number, children: number) {
-  const parts = [`${adults} ${adults === 1 ? "adult" : "adults"}`];
-  if (children > 0) {
-    parts.push(`${children} ${children === 1 ? "child" : "children"}`);
-  }
-  return parts.join(", ");
-}
 
 export function RequestCard({ request }: { request: BookingRequest }) {
   const [declineOpen, setDeclineOpen] = useState(false);

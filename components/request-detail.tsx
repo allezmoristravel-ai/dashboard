@@ -17,29 +17,7 @@ import { DeclineDialog } from "@/components/decline-dialog";
 import { SendPaymentDialog } from "@/components/send-payment-dialog";
 import { useRequests } from "@/lib/store";
 import type { BookingRequest, DbPayment, RequestStatus } from "@/lib/types";
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function formatEUR(amount: number | null) {
-  if (amount === null) return "—";
-  return `EUR ${amount.toLocaleString()}`;
-}
+import { formatDate, formatDateTime, formatEUR } from "@/lib/format";
 
 const TIMELINE_STEPS: { status: RequestStatus; label: string }[] = [
   { status: "pending_review", label: "Request created" },
