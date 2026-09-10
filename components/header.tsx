@@ -3,7 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
   { href: "/", label: "Inbox" },
@@ -13,6 +16,7 @@ const NAV_ITEMS = [
 
 export function Header() {
   const pathname = usePathname();
+  const { signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-20 border-b bg-card/80 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
@@ -67,6 +71,15 @@ export function Header() {
           </span>
           Live
         </div>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Sign out"
+          onClick={() => signOut()}
+        >
+          <LogOut />
+        </Button>
       </div>
     </header>
   );

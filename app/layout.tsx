@@ -2,8 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { RequestProvider } from "@/lib/store";
-import { Header } from "@/components/header";
+import { AuthProvider } from "@/lib/auth-context";
+import { AuthGate } from "@/components/auth-gate";
+import { AppShell } from "@/components/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { IosInstallHint } from "@/components/ios-install-hint";
 import { SwUpdatePrompt } from "@/components/sw-update-prompt";
@@ -37,13 +38,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className="pb-[env(safe-area-inset-bottom)]">
-        <RequestProvider>
-          <Header />
-          <main className="container mx-auto px-4 py-8 sm:px-6">{children}</main>
+        <AuthProvider>
+          <AuthGate>
+            <AppShell>{children}</AppShell>
+          </AuthGate>
           <Toaster richColors />
           <IosInstallHint />
           <SwUpdatePrompt />
-        </RequestProvider>
+        </AuthProvider>
       </body>
     </html>
   );
