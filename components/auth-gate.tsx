@@ -10,15 +10,20 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const isLoginPage = pathname === "/login";
+  // /reset-password is reached via the emailed link, which itself establishes
+  // a (recovery) session — it must render regardless of session state instead
+  // of being redirected away like a normal authenticated page.
+  const isResetPasswordPage = pathname === "/reset-password";
+  const isPublicPage = isLoginPage || isResetPasswordPage;
 
   useEffect(() => {
     if (loading) return;
-    if (!session && !isLoginPage) {
+    if (!session && !isPublicPage) {
       router.replace("/login");
     } else if (session && isLoginPage) {
       router.replace("/");
     }
-  }, [session, loading, isLoginPage, router]);
+  }, [session, loading, isPublicPage, isLoginPage, router]);
 
   if (loading) {
     return (
@@ -29,7 +34,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   // Redirecting — render nothing to avoid a flash of the wrong screen.
-  if ((!session && !isLoginPage) || (session && isLoginPage)) return null;
+  if ((!session && !isPublicPage) || (session && isLoginPage)) return null;
 
   return <>{children}</>;
 }

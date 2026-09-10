@@ -7,7 +7,7 @@ import { Header } from "@/components/header";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  if (pathname === "/login") {
+  if (pathname === "/login" || pathname === "/reset-password") {
     return <>{children}</>;
   }
 
